@@ -82,6 +82,28 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/contact', contactRoutes);
 
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.join(__dirname, '../client/dist');
+  const clientIndex = path.join(clientDistPath, 'index.html');
+  if (require('fs').existsSync(clientIndex)) {
+    app.use(express.static(clientDistPath));
+    app.get('*', (req, res, next) => {
+      if (req.originalUrl.startsWith('/api')) {
+        return next();
+      }
+      return res.sendFile(clientIndex);
+    });
+  } else {
+    app.get('/', (req, res) => {
+      res.json({ success: true, service: 'MarketSphere API', status: 'ok' });
+    });
+  }
+} else {
+  app.get('/', (req, res) => {
+    res.json({ success: true, message: 'MarketSphere API' });
+  });
+}
+
 app.use(notFound);
 app.use(errorHandler);
 
