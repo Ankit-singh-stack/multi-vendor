@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <rect width="600" height="600" fill="#eef2ff"/>
+  <circle cx="300" cy="260" r="110" fill="#e0e7ff"/>
+  <path d="M210 330h180l-24 90H234z" fill="#c7d2fe"/>
+  <rect x="250" y="200" width="100" height="130" rx="16" fill="#a5b4fc"/>
+  <text x="300" y="500" font-family="Arial, sans-serif" font-size="24" fill="#6366f1" text-anchor="middle">MarketSphere</text>
+</svg>
