@@ -1,5 +1,4 @@
 require('dotenv').config();
-const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -28,12 +27,26 @@ const app = express();
 
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const isRenderOrigin = (origin) => {
+  try {
+    return new URL(origin).hostname.endsWith('.onrender.com');
+  } catch {
+    return false;
+  }
+};
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        isRenderOrigin(origin) ||
+        process.env.NODE_ENV !== 'production'
+      ) {
         return cb(null, true);
       }
       return cb(new Error('Not allowed by CORS'));
@@ -83,27 +96,14 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/contact', contactRoutes);
 
-const clientDistPath = path.join(__dirname, '../client/dist');
-const clientIndex = path.join(clientDistPath, 'index.html');
-
-if (fs.existsSync(clientIndex)) {
-  app.use(express.static(clientDistPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
-      return next();
-    }
-    return res.sendFile(clientIndex);
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    service: 'MarketSphere API',
+    status: 'ok',
+    health: '/api/health',
   });
-} else {
-  app.get('/', (req, res) => {
-    res.json({
-      success: true,
-      service: 'MarketSphere API',
-      status: 'ok',
-      message: 'Frontend build not found. Run the client build to serve the app.',
-    });
-  });
-}
+});
 
 app.use(notFound);
 app.use(errorHandler);
